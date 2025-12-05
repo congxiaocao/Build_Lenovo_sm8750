@@ -214,7 +214,7 @@ jobs:
         id: ksu_version
         run: |
             cd kernel_workspace
-            curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/builtin/kernel/setup.sh" | bash -s builtin
+            curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/refs/heads/main/kernel/setup.sh" | bash -s builtin
             cd KernelSU
             KSU_VERSION=$(expr "$(git rev-list --count main)" + 37185 2>/dev/null || echo 114514)
             echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
@@ -253,17 +253,6 @@ jobs:
           cp ./oppo_oplus_realme_sm8750/zram_patch/lz4armv8.S ./common/lib
           cp ./oppo_oplus_realme_sm8750/zram_patch/002-zstd.patch ./common/
           cd ./common
-          case "${{ github.event.inputs.sub_level }}" in
-            6.6.56)
-              TASK_MMU_C="fs/proc/task_mmu.c"
-              if grep -q "vma = find_vma(mm, start_vaddr);" "$TASK_MMU_C"; then
-                echo "为 fs/proc/task_mmu.c 中的 vma 注入类型声明..."
-                sed -i 's/vma = find_vma(mm, start_vaddr);/struct vm_area_struct *vma = find_vma(mm, start_vaddr);/' "$TASK_MMU_C"
-              else
-                echo "未找到 vma = find_vma(mm, start_vaddr);，可能已经修过或补丁不一致，跳过"
-              fi
-              ;;
-          esac
           git apply -p1 < 001-lz4.patch || true
           patch -p1 < 002-zstd.patch || true
 
